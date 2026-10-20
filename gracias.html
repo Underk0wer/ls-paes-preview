@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <title>¡Gracias! — Limón Soda</title>
+  <script>
+    // Si se llega desde el formulario con el video de fuego, la página parte cubierta
+    // (antes de pintarse) y transicion-fuego.js la destapa cuando el fondo terminó de cargar
+    try { if (sessionStorage.getItem('transicion-fuego') === '1') document.documentElement.classList.add('fuego-entrando'); } catch (e) {}
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -103,6 +108,16 @@
     .p1-legal  { display: flex; gap: 18px; align-items: flex-end; }
     .p1-legal img { height: 1.5vw; width: auto; display: block; }
 
+    /* Llegada con el video de fuego: el cuadro del pico (sobre el mismo fondo rojo
+       oscuro de transicion-fuego.js) cubre la página hasta que el video toma el relevo,
+       y las animaciones de entrada esperan a que el fuego se disipe */
+    html.fuego-entrando body::after {
+      content: ""; position: fixed; inset: 0; z-index: 2147482000;
+      background: url("Assets/02/Fire_pico.webp") center / cover no-repeat,
+                  linear-gradient(to bottom, rgb(35,5,0), rgb(95,18,2) 50%, rgb(170,55,8));
+    }
+    html.fuego-entrando body * { animation-play-state: paused !important; }
+
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
       .bg-comp { --fx: 70%; }                       /* mobile: encuadra la lata y al estudiante */
@@ -191,5 +206,7 @@
       if (!bgRaf) bgRaf = requestAnimationFrame(stepBg);
     });
   </script>
+  <script src="transicion-fuego.js"></script>
+  <script>TransicionFuego.entrar();</script>
 </body>
 </html>

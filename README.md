@@ -22,6 +22,7 @@ DESARROLLO/
 ├── formulario.html
 ├── gracias.html
 ├── humo.js             ← humo animado del fondo (lo usan index y formulario)
+├── transicion-fuego.js ← transición con el video de fuego (formulario → gracias)
 ├── .htaccess           ← config para Apache/cPanel (opcional; se ignora en otros hosts)
 └── Assets/             ← videos, imágenes, SVG y logo (rutas relativas)
 ```

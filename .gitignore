@@ -6,6 +6,9 @@ Assets/01/Texto/Fondo_Texto.png
 Assets/02/Fondo_Formulario.jpg
 Assets/03/Fondo_TY.jpg
 
+# Video original de la transición (ProRes, 52 MB): la web usa Fire.webm y Fire_hevc.mov
+Assets/02/Fire.mov
+
 # Fondos y textos de la versión anterior (año sabático): el sitio ya no los usa
 Assets/Fondo_T.mp4
 Assets/Fondo_t_Mobile.mp4

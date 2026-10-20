@@ -189,10 +189,12 @@
   </div>
 
   <script src="humo.js"></script>
+  <script src="transicion-fuego.js"></script>
   <script>
-    // ENVIAR (Boton_2) -> pantalla de gracias
+    // ENVIAR (Boton_2) -> pantalla de gracias, pasando con el video de fuego
+    TransicionFuego.preparar();
     document.querySelector('.p2-enviar-btn').addEventListener('click', () => {
-      window.location.href = 'gracias.html';
+      TransicionFuego.salir('gracias.html');
     });
 
     // Parallax horizontal del fondo (igual que en el index).
