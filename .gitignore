@@ -1,0 +1,21 @@
+.DS_Store
+
+# Referencias de diseño: solo sirven para ubicar capas y textos, no se publican
+Assets/01/Fondo_Base.jpg
+Assets/01/Texto/Fondo_Texto.png
+Assets/02/Fondo_Formulario.jpg
+Assets/03/Fondo_TY.jpg
+
+# Fondos y textos de la versión anterior (año sabático): el sitio ya no los usa
+Assets/Fondo_T.mp4
+Assets/Fondo_t_Mobile.mp4
+Assets/Pagina_1/Sabatico.svg
+Assets/Pagina_1/Ganar.svg
+Assets/Pagina_1/dinero.svg
+Assets/Pagina_1/Al_Mes.svg
+Assets/Pagina_1/Fondo_Oscuro.png
+Assets/Pagina_2/Fondo_2.mp4
+Assets/Pagina_2/Fondo_2_Estatico.png
+Assets/Pagina_2/Fondo_t_Mobile_2.jpg
+Assets/Pagina_3/Fondo_3.mp4
+Assets/Pagina_3/Pantalla_B_Mobile_V.mp4

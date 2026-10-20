@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>¡Gracias! — Limón Soda</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* Fondo: capas de Assets/03 (referencia: 03/Fondo_TY, 1920×1080).
+       Mismo escenario que el index: cubre la pantalla como object-fit: cover y cada capa
+       se ubica con sus px del lienzo 1920×1080 (--x, --y, --w). */
+    .bg-comp { position: fixed; inset: 0; z-index: 0; overflow: hidden;
+               --fx: 50%; }   /* punto focal horizontal (equivale a object-position) */
+    .bg-stage {
+      position: absolute; top: 50%; left: var(--fx);
+      /* 5% extra = ~45 px de margen por lado (en px del lienzo): ningún data-depth
+         del parallax debe superarlo, o se verán los bordes del fondo */
+      width: calc(max(100vw, 100vh * 16 / 9) * 1.05);
+      aspect-ratio: 16 / 9;
+      transform: translate(calc(-1 * var(--fx)), -50%);
+    }
+    .bg-stage img {
+      position: absolute;
+      left:  calc(var(--x) / 1920 * 100%);
+      top:   calc(var(--y) / 1080 * 100%);
+      width: calc(var(--w) / 1920 * 100%);
+      height: auto; display: block;
+      pointer-events: none; user-select: none;
+    }
+
+    /* Lata: pulso suave (igual que en el index). Solo crece (nunca baja de scale 1) para no destapar lo que hay detrás */
+    .bg-lata { animation: lata-pulse 2.6s ease-in-out infinite; }
+    @keyframes lata-pulse {
+      0%, 100% { transform: scale(1);    }
+      50%      { transform: scale(1.04); }
+    }
+
+    /* Animaciones de entrada */
+    @keyframes p1-in   { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes p1-fade { from { opacity: 0; } to { opacity: 1; } }
+    /* Pulso suave para Gracias / Sabático */
+    @keyframes g-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+    /* ===== Elementos de Pagina_3: columna a la izquierda =====
+       La columna parte en el 8% de la pantalla y termina un poco antes de la lata
+       (x 826 del lienzo). Como la lata se mueve con el encuadre del fondo, el ancho usa
+       la misma escala que .bg-stage: en 16:9 mide 33vw; en pantallas más angostas se
+       achica para no tocar la lata, y en las más anchas se limita por el alto (58.67vh
+       = 33vw a 16:9) para que los textos no se amontonen. Dentro de la columna, cada elemento
+       conserva su posición relativa del diseño original (en % del ancho de la columna).
+       Gracias: capa externa = posición + entrada, img interna = pulso.
+       Así el pulso (scale) no choca con la animación de entrada (translateY). */
+    .g-textos   { position: fixed; z-index: 2; top: 0; bottom: 0; left: 8%;
+                  width: min(58.67vh, calc(40.33vw - max(100vw, 100vh * 16 / 9) * 0.07328)); }
+    .g-textos > * { position: absolute; }
+    .g-gracias  { top: 14%; left: 0;      width: 100%;
+                  animation: p1-in 0.8s ease-out 0.30s backwards; }
+    .g-comparte { top: 43%; left: 0;      width: 93.94%;
+                  animation: p1-in 0.7s ease-out 0.55s backwards; }
+    .g-slogan   { top: 73%; left: 19.7%;  width: 62.12%;
+                  animation: p1-in 0.7s ease-out 0.80s backwards; }
+
+    /* Pulso suave en Gracias */
+    .g-gracias  img { animation: g-pulse 2.6s ease-in-out 1.20s infinite; }
+
+    /* Botones para compartir (Facebook / WhatsApp) */
+    .g-share    { z-index: 3; top: 60%; width: 14.55%;
+                  animation: p1-in 0.7s ease-out 0.68s backwards; }
+    .g-share.fb { left: 29.09%; }
+    .g-share.ws { left: 50%; }
+    .g-share img { transition: transform 0.15s ease; }
+    .g-share:hover img { transform: scale(1.12); }
+
+    .g-gracias img, .g-share img { display: block; width: 100%; height: auto; }
+    .g-comparte, .g-slogan { display: block; }
+
+    /* ===== Compartidos con las otras pantallas ===== */
+    .logo-ls {
+      position: fixed; top: 3%; right: 1%; width: 14%;
+      z-index: 4; cursor: pointer;
+      animation: p1-in 0.7s ease-out 0.15s backwards;
+    }
+    .logo-ls img { display: block; width: 100%; height: auto; transition: transform 0.15s ease; }
+    .logo-ls:hover img { transform: scale(1.04); }
+    .p1-footer {
+      position: fixed; left: 3%; bottom: 3.5%; z-index: 4;
+      display: flex; flex-direction: column; gap: 10px;
+      animation: p1-in 0.7s ease-out 0.7s backwards;
+    }
+    .p1-social { display: flex; gap: 14px; align-items: center; }
+    .p1-social a { display: block; transition: transform 0.15s ease; }
+    .p1-social a:hover { transform: scale(1.15); }
+    .p1-social img { width: 2vw; height: auto; display: block; }
+    .p1-legal  { display: flex; gap: 18px; align-items: flex-end; }
+    .p1-legal img { height: 1.5vw; width: auto; display: block; }
+
+    /* ===================== MOBILE (portrait) ===================== */
+    @media (max-width: 768px) {
+      .bg-comp { --fx: 70%; }                       /* mobile: encuadra la lata y al estudiante */
+      .logo-ls { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
+
+      .g-textos { left: 0; width: 100%; }           /* mobile: columna a todo el ancho, textos centrados */
+      .g-gracias, .g-comparte, .g-slogan {
+        left: 0; right: 0; margin-left: auto; margin-right: auto;   /* centra sin transform */
+      }
+      .g-gracias  { top: 16%; width: 84vw; }
+      .g-comparte { top: 33%; width: 86vw; }
+      .g-slogan   { top: 53%; width: 52vw; }
+
+      /* Botones de compartir centrados como par */
+      .g-share { top: 45%; width: 16vw; }
+      .g-share.fb { left: 29vw; right: auto; }
+      .g-share.ws { left: 55vw; right: auto; }
+
+      .p1-footer { left: 0; right: 0; bottom: 2.5%; gap: 14px; align-items: center; }
+      .p1-social { gap: 22px; justify-content: center; }
+      .p1-social img { width: 8vw; }
+      .p1-legal  { gap: 4vw; justify-content: center; }
+      .p1-legal img { height: 3.4vw; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo estancia 3: capas de atrás hacia adelante (biblioteca, estudiante, lata) -->
+  <div class="bg-comp" aria-hidden="true">
+    <div class="bg-stage">
+      <img src="Assets/03/Fondo.png"      style="--x:0;   --y:0;   --w:1920" data-depth="40" alt="" />
+      <img src="Assets/03/ESTUDIANTE.png" style="--x:968; --y:129; --w:900"  alt="" />
+      <img src="Assets/03/Mano_Lata.png"  style="--x:826; --y:160; --w:489"  class="bg-lata" alt="" />
+    </div>
+  </div>
+
+  <!-- Elementos Pagina_3 -->
+  <div class="g-textos">
+    <div class="g-gracias"><img src="Assets/Pagina_3/Gracias_1.svg" alt="¡Gracias! Ya estás participando" /></div>
+    <img class="g-comparte" src="Assets/Pagina_3/Comparte_1.svg" alt="Comparte el concurso con tus amigos" />
+    <img class="g-slogan" src="Assets/Pagina_2/Haztodo.svg" alt="Haz todo, haz nada" />
+    <a class="g-share fb" id="share-fb" target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook"><img src="Assets/Pagina_3/FB_Share.svg" alt="Facebook" /></a>
+    <a class="g-share ws" id="share-ws" target="_blank" rel="noopener noreferrer" aria-label="Compartir por WhatsApp"><img src="Assets/Pagina_3/WS_Share.svg" alt="WhatsApp" /></a>
+  </div>
+
+  <!-- Compartidos -->
+  <a class="logo-ls" href="index.html" aria-label="Volver al inicio"><img src="Assets/Logo_LS.webp" alt="Limón Soda" /></a>
+  <div class="p1-footer">
+    <div class="p1-social">
+      <a href="https://www.youtube.com/@LShaztodohaznada" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><img src="Assets/Pagina_1/YT.svg" alt="YouTube" /></a>
+      <a href="https://www.tiktok.com/@limonsodacl" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><img src="Assets/Pagina_1/TT.svg" alt="TikTok" /></a>
+      <a href="https://www.instagram.com/limonsodacl/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="Assets/Pagina_1/IG.svg" alt="Instagram" /></a>
+    </div>
+    <div class="p1-legal">
+      <img src="Assets/Pagina_1/Bases.svg" alt="Bases legales" />
+      <img src="Assets/Pagina_1/Terminos.svg" alt="Términos y condiciones" />
+    </div>
+  </div>
+
+  <script>
+    // Botones de compartir: apuntan a la página de inicio del sitio
+    (function () {
+      var siteUrl = window.location.origin + window.location.pathname.replace(/gracias\.html$/, 'index.html');
+      var enc = encodeURIComponent(siteUrl);
+      var msg = encodeURIComponent('¡Participa por un Año Sabático con Limón Soda Zero! ' + siteUrl);
+      document.getElementById('share-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc;
+      document.getElementById('share-ws').href = 'https://wa.me/?text=' + msg;
+    })();
+
+    // Parallax horizontal del fondo (igual que en el index): el estudiante y la lata quedan fijos.
+    // data-depth = desplazamiento máximo en px del lienzo 1920×1080 con el mouse en el borde.
+    const bgStage = document.querySelector('.bg-stage');
+    const bgLayers = Array.from(bgStage.querySelectorAll('[data-depth]'));
+    let bgTarget = 0, bgX = 0, bgRaf = 0;
+    const stepBg = () => {
+      bgX += (bgTarget - bgX) * 0.08;
+      if (Math.abs(bgTarget - bgX) < 0.0005) bgX = bgTarget;
+      const u = bgStage.offsetWidth / 1920;
+      bgLayers.forEach(layer => {
+        layer.style.transform = `translate3d(${(bgX * layer.dataset.depth * u).toFixed(2)}px, 0, 0)`;
+      });
+      bgRaf = bgX === bgTarget ? 0 : requestAnimationFrame(stepBg);
+    };
+    window.addEventListener('mousemove', (e) => {
+      bgTarget = (e.clientX / window.innerWidth - 0.5) * 2;
+      if (!bgRaf) bgRaf = requestAnimationFrame(stepBg);
+    });
+  </script>
+</body>
+</html>

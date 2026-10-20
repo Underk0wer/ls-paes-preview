@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Limón Soda</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* --- Fondo: composición de capas de Assets/01 (referencia: Fondo_Base, 1920×1080) ---
+       El escenario cubre la pantalla como object-fit: cover; cada capa se ubica
+       con sus coordenadas en píxeles del lienzo 1920×1080 (--x, --y, --w). */
+    .bg-comp {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      --fx: 50%;           /* punto focal horizontal (equivale a object-position) */
+    }
+    .bg-stage {
+      position: absolute;
+      top: 50%;
+      left: var(--fx);
+      /* 5% extra = ~45 px de margen por lado (en px del lienzo): ningún data-depth
+         del parallax debe superarlo, o se verán los bordes del fondo y la mesa */
+      width: calc(max(100vw, 100vh * 16 / 9) * 1.05);
+      aspect-ratio: 16 / 9;
+      transform: translate(calc(-1 * var(--fx)), -50%);
+    }
+    .bg-stage img {
+      position: absolute;
+      left:  calc(var(--x) / 1920 * 100%);
+      top:   calc(var(--y) / 1080 * 100%);
+      width: calc(var(--w) / 1920 * 100%);
+      height: auto;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Humo: canvas dentro del escenario (lo dibuja humo.js) */
+    .bg-humo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      animation: p1-fade 1.5s ease-out backwards;
+    }
+
+    /* Lata: pulso suave. Solo crece (nunca baja de scale 1) para no destapar lo que hay detrás */
+    .bg-lata { animation: lata-pulse 2.6s ease-in-out infinite; }
+    @keyframes lata-pulse {
+      0%, 100% { transform: scale(1);    }
+      50%      { transform: scale(1.04); }
+    }
+
+    /* --- Botón "Participa aquí" --- */
+    /* Wrapper: posición fija + centrado + animación de entrada */
+    .btn-wrap {
+      position: fixed;
+      left: 50%;
+      bottom: 7%;
+      transform: translateX(-50%);
+      z-index: 3;
+      width: min(320px, 62vw);     /* se adapta en mobile */
+      animation: p1-in-btn 0.7s ease-out 0.9s backwards;
+    }
+    /* Capa de pulso suave continuo (separada para no chocar con hover/press) */
+    .btn-pulse {
+      animation: dinero-pulse 2.6s ease-in-out infinite;
+    }
+    .btn-participa {
+      position: relative;          /* ancla las capas ::before/::after */
+      display: block;
+      width: 100%;
+      aspect-ratio: 308 / 85;      /* mantiene la proporción */
+      background: url("Assets/Boton_1_P.svg") center / contain no-repeat; /* capa base = Pres (se ve al presionar) */
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: transform 0.08s ease;
+    }
+    /* Capas: base = Boton_1_Pres. ::before = normal (Boton_1), ::after = M (Boton_1_M).
+       Al presionar se ocultan normal y M → queda solo Pres, sin superponerse. */
+    .btn-participa::before,
+    .btn-participa::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: center / contain no-repeat;
+      pointer-events: none;
+    }
+    .btn-participa::before {   /* normal (Boton_1) */
+      background-image: url("Assets/Boton_1.svg");
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    /* HOVER: funde suavemente a Boton_1_M (se dispara desde el wrapper, caja estable) */
+    .btn-participa::after {    /* M (Boton_1_M) */
+      background-image: url("Assets/Boton_1_M.svg");
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .btn-wrap:hover .btn-participa::after { opacity: 1; }
+    /* PRESSED: ocultar normal y M → se ve solo Boton_1_Pres (la base) + se HUNDE */
+    .btn-participa.is-pressed::before { opacity: 0; transition: none; }
+    .btn-wrap:hover .btn-participa.is-pressed::after { opacity: 0; transition: none; }
+    .btn-participa.is-pressed {
+      transform: translateY(4px) scale(0.97);
+    }
+
+    /* ===== Página 1: elementos sobre el video ===== */
+    /* Animaciones de entrada (fill-mode backwards: no dejan estilos pegados
+       después, así el hover/pressed del botón sigue funcionando) */
+    @keyframes p1-in {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes p1-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes p1-in-btn {   /* conserva el centrado translateX(-50%) del botón */
+      from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Bloque de textos: medidas de Assets/01/Texto/Fondo_Texto (1920×1080), donde el
+       bloque ocupa x 1074–1822, y 618–1010 (borde inferior al 6.48%); aquí va subido un
+       5% más. Se ancla abajo a la derecha para que no se salga de pantalla en formatos
+       más anchos; cada texto usa sus px dentro del bloque. */
+    .p1-textos {
+      position: fixed; z-index: 2; pointer-events: none;
+      right: 5.1%; bottom: 11.48%; width: 38.96%;
+      aspect-ratio: 748 / 392;
+    }
+    .p1-textos > div {
+      position: absolute;
+      left:  calc(var(--x) / 748 * 100%);
+      top:   calc(var(--y) / 392 * 100%);
+      width: calc(var(--w) / 748 * 100%);
+    }
+    .p1-cambia { animation: p1-in 0.7s ease-out 0.30s backwards; }
+    .p1-puntos { animation: p1-in 0.7s ease-out 0.45s backwards; }
+    .p1-por    { animation: p1-in 0.7s ease-out 0.55s backwards; }
+    .p1-lucas  { animation: p1-in 0.7s ease-out 0.65s backwards; }
+    .p1-textos img { display: block; width: 100%; height: auto; }
+
+    /* Parallax: se mueve con el mouse (offset lo aplica el JS) */
+    .parallax {
+      width: 100%;
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); /* más suave/amortiguado */
+      will-change: transform;
+    }
+
+    /* Dinero: pulso suave (agranda/achica) */
+    .dinero-pulse {
+      position: relative; width: 100%;
+      animation: dinero-pulse 2.6s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes dinero-pulse {
+      0%, 100% { transform: scale(1);    }
+      50%      { transform: scale(1.06); }
+    }
+
+    /* Dinero: brillo que recorre de izquierda a derecha (enmascarado al número) */
+    .shine {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+      -webkit-mask: url("Assets/01/Texto/Lucas.svg") center / contain no-repeat;
+              mask: url("Assets/01/Texto/Lucas.svg") center / contain no-repeat;
+    }
+    .shine::before {
+      content: ""; position: absolute; top: -25%; left: -75%;
+      width: 45%; height: 150%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.92), transparent);
+      transform: skewX(-18deg);
+      animation: dinero-shine 3.4s ease-in-out infinite;
+    }
+    @keyframes dinero-shine {
+      0%   { left: -75%; }
+      55%  { left: 135%; }
+      100% { left: 135%; }
+    }
+
+    /* Footer inferior izquierdo: redes + links legales */
+    .p1-footer {
+      position: fixed; left: 3%; bottom: 3.5%; z-index: 2;
+      display: flex; flex-direction: column; gap: 10px;
+      animation: p1-in 0.7s ease-out 0.85s backwards;
+    }
+    .p1-social { display: flex; gap: 14px; align-items: center; }
+    .p1-social a { display: block; transition: transform 0.15s ease; }
+    .p1-social a:hover { transform: scale(1.15); }
+    .p1-social img { width: 2vw; height: auto; display: block; }
+    .p1-legal  { display: flex; gap: 18px; align-items: flex-end; }
+    .p1-legal img { height: 1.5vw; width: auto; display: block; }
+
+    /* --- Logo Limón Soda (esquina superior derecha) --- */
+    .logo-ls {
+      position: fixed;
+      top: 3%;
+      left: 1%;
+      width: 14%;          /* TAMAÑO en % del ancho de pantalla (ajustable) */
+      z-index: 4;
+      cursor: pointer;     /* enlace al inicio */
+      animation: p1-in 0.7s ease-out 0.15s backwards;
+    }
+    .logo-ls img { display: block; width: 100%; height: auto; transition: transform 0.15s ease; }
+    .logo-ls:hover img { transform: scale(1.04); }
+
+    /* ===================== MOBILE (portrait) ===================== */
+    @media (max-width: 768px) {
+      .bg-comp  { --fx: 42%; }                      /* mobile: encuadra la lata y al estudiante */
+      .logo-ls  { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
+
+      /* Bloque de textos centrado, agrupado sobre el botón */
+      .p1-textos { left: 0; right: 0; bottom: auto; margin-left: auto; margin-right: auto;
+                   top: 24%; width: 92vw; }
+
+      /* Botón participa: 20% más pequeño */
+      .btn-wrap { top: 52%; bottom: auto; width: 67vw; }
+
+      /* Footer centrado */
+      .p1-footer { left: 0; right: 0; bottom: 2.5%; gap: 14px; align-items: center; }
+      .p1-social { gap: 22px; justify-content: center; }
+      .p1-social img { width: 8vw; }
+      .p1-legal  { gap: 4vw; justify-content: center; }
+      .p1-legal img { height: 3.4vw; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo estancia 1: capas de atrás hacia adelante (fondo, diablo, ángel, humo hasta el pecho, estudiante, mesa, lata) -->
+  <div class="bg-comp" aria-hidden="true">
+    <div class="bg-stage">
+      <img src="Assets/01/Fondo.png"      style="--x:0;   --y:0;   --w:1920" data-depth="40"  alt="" />
+      <img src="Assets/01/Diablo.png"     style="--x:130; --y:83;  --w:505"  data-depth="24"  alt="" />
+      <img src="Assets/01/ANGEL.png"      style="--x:870; --y:15;  --w:974"  data-depth="24"  alt="" />
+      <canvas class="bg-humo humo-pecho" width="960" height="540" data-depth="12"></canvas>
+      <img src="Assets/01/ESTUDIANTE.png" style="--x:621; --y:101; --w:1297" alt="" />
+      <img src="Assets/01/MESA.png"       style="--x:0;   --y:0;   --w:1920" data-depth="-12" alt="" />
+      <img src="Assets/01/Mano_Lata.png"  style="--x:460; --y:210; --w:489"  class="bg-lata" alt="" />
+    </div>
+  </div>
+
+  <!-- ===== Página 1 ===== -->
+  <div class="p1-textos">
+    <div class="p1-cambia" style="--x:28;  --y:0;   --w:327.55"><div class="parallax" data-depth="7"><img src="Assets/01/Texto/Cambia_Tus.svg" alt="Cambia tus" /></div></div>
+    <div class="p1-puntos" style="--x:0;   --y:69;  --w:747.98"><div class="parallax" data-depth="14"><img src="Assets/01/Texto/Puntos_Paes.svg" alt="Puntos PAES" /></div></div>
+    <div class="p1-por"    style="--x:234; --y:215; --w:136.75"><div class="parallax" data-depth="5"><img src="Assets/01/Texto/Por.svg" alt="por" /></div></div>
+    <div class="p1-lucas"  style="--x:343; --y:211; --w:385.12"><div class="parallax" data-depth="10"><div class="dinero-pulse"><img src="Assets/01/Texto/Lucas.svg" alt="Luca$" /><span class="shine"></span></div></div></div>
+  </div>
+
+  <div class="p1-footer">
+    <div class="p1-social">
+      <a href="https://www.youtube.com/@LShaztodohaznada" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><img src="Assets/Pagina_1/YT.svg" alt="YouTube" /></a>
+      <a href="https://www.tiktok.com/@limonsodacl" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><img src="Assets/Pagina_1/TT.svg" alt="TikTok" /></a>
+      <a href="https://www.instagram.com/limonsodacl/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="Assets/Pagina_1/IG.svg" alt="Instagram" /></a>
+    </div>
+    <div class="p1-legal">
+      <img src="Assets/Pagina_1/Bases.svg" alt="Bases legales" />
+      <img src="Assets/Pagina_1/Terminos.svg" alt="Términos y condiciones" />
+    </div>
+  </div>
+
+  <a class="logo-ls" href="index.html" aria-label="Volver al inicio"><img src="Assets/Logo_LS.webp" alt="Limón Soda" /></a>
+
+  <div class="btn-wrap">
+    <div class="btn-pulse">
+      <a href="formulario.html" class="btn-participa" role="button" aria-label="Participa aquí"></a>
+    </div>
+  </div>
+
+  <script src="humo.js"></script>
+  <script>
+    // Efecto del botón "Participa aquí": se dispara al presionar
+    const cta = document.querySelector('.btn-participa');
+    let pressedAt = 0;
+    const press = () => {
+      pressedAt = performance.now();
+      cta.classList.add('is-pressed');
+    };
+    const release = () => {
+      // mantiene el efecto un mínimo de 220ms aunque el clic sea muy rápido
+      const wait = Math.max(0, 220 - (performance.now() - pressedAt));
+      setTimeout(() => cta.classList.remove('is-pressed'), wait);
+    };
+    // Los eventos van en el wrapper (caja estable): el hundido del botón
+    // no dispara pointerleave espurios que corten el press a media animación.
+    const btnWrap = document.querySelector('.btn-wrap');
+    btnWrap.addEventListener('pointerdown', press);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev =>
+      btnWrap.addEventListener(ev, release)
+    );
+
+    // Parallax: los elementos se desplazan según la posición del mouse
+    const layers = Array.from(document.querySelectorAll('.parallax'));
+    let ticking = false, mx = 0, my = 0;
+    const applyParallax = () => {
+      layers.forEach(layer => {
+        const d = parseFloat(layer.dataset.depth) || 0;
+        layer.style.transform = `translate(${(-mx * d).toFixed(1)}px, ${(-my * d).toFixed(1)}px)`;
+      });
+      ticking = false;
+    };
+    window.addEventListener('mousemove', (e) => {
+      mx = (e.clientX / window.innerWidth  - 0.5) * 2;   // -1 .. 1
+      my = (e.clientY / window.innerHeight - 0.5) * 2;
+      if (!ticking) { ticking = true; requestAnimationFrame(applyParallax); }
+    });
+
+    // Parallax horizontal del fondo: la lata y el estudiante quedan fijos.
+    // data-depth = desplazamiento máximo en px del lienzo 1920×1080 con el mouse en el borde
+    // (positivo: acompaña al mouse; negativo: va en sentido contrario, como lo que está delante).
+    const bgStage = document.querySelector('.bg-stage');
+    const bgLayers = Array.from(bgStage.querySelectorAll('[data-depth]'));
+    let bgTarget = 0, bgX = 0, bgRaf = 0;
+    const stepBg = () => {
+      bgX += (bgTarget - bgX) * 0.08;
+      if (Math.abs(bgTarget - bgX) < 0.0005) bgX = bgTarget;
+      const u = bgStage.offsetWidth / 1920;
+      bgLayers.forEach(layer => {
+        layer.style.transform = `translate3d(${(bgX * layer.dataset.depth * u).toFixed(2)}px, 0, 0)`;
+      });
+      bgRaf = bgX === bgTarget ? 0 : requestAnimationFrame(stepBg);
+    };
+    window.addEventListener('mousemove', (e) => {
+      bgTarget = (e.clientX / window.innerWidth - 0.5) * 2;
+      if (!bgRaf) bgRaf = requestAnimationFrame(stepBg);
+    });
+
+    // Humo entre el estudiante y el diablo/ángel: niebla baja que sale de detrás de la
+    // mesa y les llega hasta el pecho (pecho del diablo y del ángel: y ≈ 420–480)
+    crearHumo(document.querySelector('.humo-pecho'), {
+      cantidad: 40,
+      zonas: [[-60, 700, 0.45], [1150, 1980, 0.45], [700, 1150, 0.1]],
+      y: [480, 820], subida: [3, 10], deriva: 20,
+      tamano: [300, 480], crece: [8, 18], vida: [18, 28], opacidad: [0.35, 0.5],
+      techo: [410, 540],
+    });
+
+    /* ===== PRUEBA: transición círculo amarillo -> formulario =====
+       (Bloque de prueba. Si se pide "borra el círculo", eliminar TODO este bloque
+        y quitar e.preventDefault del botón para volver a la navegación normal.) */
+    (function () {
+      function easeInOut(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+      function playIris(x, y, midCb) {
+        var ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#fce300;pointer-events:none;will-change:clip-path;';
+        ov.style.clipPath = ov.style.webkitClipPath = 'circle(0px at ' + x + 'px ' + y + 'px)';
+        document.body.appendChild(ov);
+        var W = window.innerWidth, H = window.innerHeight;
+        var fillR = Math.hypot(Math.max(x, W - x), Math.max(y, H - y)) * 1.06; // cubre desde el botón
+        var cx = W / 2, cy = H / 2;
+        var holeR = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) * 1.06; // abre desde el centro
+        var A = 520, B = 580, start = null, phase = 1, mid = false;
+        function frame(ts) {
+          if (start === null) start = ts;
+          var el = ts - start;
+          if (phase === 1) {                                   // 1) se rellena de amarillo
+            var t = Math.min(el / A, 1), r = easeInOut(t) * fillR;
+            ov.style.clipPath = ov.style.webkitClipPath = 'circle(' + r + 'px at ' + x + 'px ' + y + 'px)';
+            if (t >= 1) {
+              if (!mid) { mid = true; if (midCb) midCb(); }    // detrás ya está el formulario
+              ov.style.clipPath = ov.style.webkitClipPath = 'none';
+              phase = 2; start = ts;
+            }
+            requestAnimationFrame(frame);
+          } else {                                             // 2) se abre círculo transparente
+            var t2 = Math.min(el / B, 1), r2 = easeInOut(t2) * holeR;
+            var m = 'radial-gradient(circle at ' + cx + 'px ' + cy + 'px, transparent ' + r2 + 'px, #000 ' + (r2 + 0.5) + 'px)';
+            ov.style.webkitMaskImage = ov.style.maskImage = m;
+            if (t2 >= 1) { if (ov.parentNode) ov.parentNode.removeChild(ov); return; }
+            requestAnimationFrame(frame);
+          }
+        }
+        requestAnimationFrame(frame);
+      }
+      var link = document.querySelector('.btn-participa');
+      if (link) {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();               // evita que el manejador global (data-nav) navegue de golpe
+          var r = link.getBoundingClientRect();
+          playIris(r.left + r.width / 2, r.top + r.height / 2, function () {
+            if (typeof showScreen === 'function') showScreen('f'); // archivo único
+            else window.location.href = 'formulario.html';         // sitio normal
+          });
+        });
+      }
+    })();
+    /* ===== FIN PRUEBA ===== */
+  </script>
+</body>
+</html>
