@@ -37,6 +37,18 @@
       pointer-events: none; user-select: none;
     }
 
+    /* Capa envuelta: el contenedor se ubica y recibe el parallax (transform); la imagen de
+       adentro lleva su propio transform (el espejo) sin invertir la dirección del parallax */
+    .bg-stage .bg-capa {
+      position: absolute;
+      left:  calc(var(--x) / 1920 * 100%);
+      top:   calc(var(--y) / 1080 * 100%);
+      width: calc(var(--w) / 1920 * 100%);
+      pointer-events: none;
+    }
+    .bg-stage .bg-capa > img { position: static; width: 100%; }
+    .bg-espejo > img { transform: scaleX(-1); }   /* ángel y aureola, en espejo a la derecha del diablo */
+
     /* Aureola del ángel: flota de arriba hacia abajo en loop (igual que en el index).
        Usa la propiedad translate (no transform) para sumarse al parallax, que mueve la
        capa con transform; ±5% de su alto ≈ ±7 px del lienzo */
@@ -139,49 +151,46 @@
 
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
-      /* Mobile: página con scroll en la que todo se mide en vw (escala con el ancho, como un
-         afiche): logo, título, recuadro y botones arriba; ángel y diablo abajo, sobre
-         Fondo_Mobile. Todo va en position: absolute (no fixed), así el fondo y los elementos
-         se desplazan juntos al hacer scroll. El alto (268.5vw) es el fin de los botones
-         (171.55vw) + 5vw de aire + el alto de los personajes (91.95vw) */
+      /* Mobile: composición de 02/Mobile/Fondo_Formulario (1080×1920). Todo se mide en vw
+         (px de la referencia / 1080 × 100), así escala con el ancho como un afiche, y va en
+         position: absolute (no fixed) para que el fondo y los elementos se desplacen juntos
+         si hay scroll. El alto mínimo (189.2vw + 14px) es el fin de los botones (170.7vw)
+         + 4vw de aire + el pie (≈11.4vw + 14px) + 3vw de margen */
       html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
       html { background: #a1866e; }                /* color del techo de Fondo_Mobile, por si el scroll rebota */
-      body { position: relative; min-height: max(100vh, 268.5vw); background: transparent; }
+      body { position: relative; min-height: max(100vh, calc(189.2vw + 14px)); background: transparent; }
+      /* Fondo_Mobile ampliado al 122% (1318 px de ancho), recortado desde x 124, y 28 */
       .bg-comp { position: absolute;
-                 background: #a76c45 url("Assets/02/Fondo_Mobile.jpg") center bottom / cover no-repeat; }
-      .bg-stage .bg-fondo { display: none; }        /* la biblioteca horizontal es solo para desktop */
+                 background: #a76c45 url("Assets/02/Fondo_Mobile.jpg") -11.48vw -2.59vw / 122% auto no-repeat; }
 
-      /* Ángel, aureola, diablo y humo: el grupo ocupa x 21–1023 (1002 px) e y 166–1080 (914 px)
-         del lienzo; en mobile mide 100.8vw de ancho (91.95vw de alto), centrado y apoyado abajo */
-      .bg-stage {
-        --gw: 100.8vw;
-        top: auto; bottom: 0;
-        left: calc(50% - var(--gw) / 2 - var(--gw) * 21 / 1002);
-        width: calc(var(--gw) * 1920 / 1002);
-        transform: none;
+      /* Personajes: bustos chicos sobre el título, cortados en y 385 (a mitad del título, que
+         tapa el corte). El escenario pasa a ser una franja de 0–385 px con overflow hidden y
+         cada capa se ubica con sus px de la referencia (--mx, --my, --mw). Sin humo: los
+         personajes quedan casi enteros detrás del título */
+      .bg-stage { top: 0; left: 0; width: 100vw; height: calc(385 / 1080 * 100vw);
+                  aspect-ratio: auto; transform: none; overflow: hidden; }
+      .bg-stage .bg-fondo, .bg-stage .bg-humo { display: none; }
+      .bg-stage > img, .bg-stage .bg-capa {
+        left:  calc(var(--mx) / 1080 * 100vw);
+        top:   calc(var(--my) / 1080 * 100vw);
+        width: calc(var(--mw) / 1080 * 100vw);
       }
-      /* El escenario achicado deja sus bordes izquierdo y superior dentro de la pantalla:
-         el humo se desvanece hacia ellos para que no se vea cortado */
-      .bg-humo {
-        -webkit-mask-image: linear-gradient(to right, transparent, #000 12%), linear-gradient(to bottom, transparent, #000 28%);
-        -webkit-mask-composite: source-in;
-                mask-image: linear-gradient(to right, transparent, #000 12%), linear-gradient(to bottom, transparent, #000 28%);
-                mask-composite: intersect;
-      }
+      .bg-espejo > img { transform: none; }        /* en mobile el ángel va sin espejo */
+      .capa-diablo  { --mx: 93;  --my: 51; --mw: 297.6; }
+      .capa-angel   { --mx: 568; --my: 36; --mw: 461.1; }
+      .capa-aureola { --mx: 830; --my: 20; --mw: 110.4; }
 
       .logo-ls, .p2-titulo, .p2-panel, .p2-enviar, .p2-borrar, .p1-footer { position: absolute; }
-      .logo-ls  { top: 4.3vw; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
+      .logo-ls  { top: 3vw; left: 29.7vw; right: auto; margin: 0; width: 37.5vw; }   /* entre los dos personajes */
 
-      /* Título 3vw bajo el logo (que termina en 27.9vw); recuadro y botones a continuación */
-      .p2-titulo { left: 0; right: 0; margin-left: auto; margin-right: auto;
-                   top: 30.9vw; width: 88vw; }
-      .p2-panel  { left: 0; right: 0; margin-left: auto; margin-right: auto;
-                   top: 50.4vw; width: 92vw; height: auto; aspect-ratio: 580 / 644; }
+      /* Título (x 59, y 323, 950 px), recuadro (x 35, y 534, 996 px) y botones (y 1703) */
+      .p2-titulo { left: 5.46vw; right: auto; margin: 0; top: 29.91vw; width: 87.96vw; }
+      .p2-panel  { left: 3.24vw; right: auto; margin: 0; top: 49.44vw; width: 92.22vw;
+                   height: auto; aspect-ratio: 580 / 644; }
       .p2-slogan { display: none; }                /* Haztodo: se oculta para no chocar con el recuadro */
 
-      /* Botones ENVIAR / BORRAR centrados como par, debajo del recuadro */
-      .p2-enviar { left: 2vw;  right: auto; top: 158.6vw; width: 47vw; }
-      .p2-borrar { left: 51vw; right: auto; top: 158.6vw; width: 47vw; }
+      .p2-enviar { left: 1.30vw;  right: auto; top: 157.69vw; width: 47.22vw; }
+      .p2-borrar { left: 50.37vw; right: auto; top: 157.69vw; width: 47.13vw; }
 
       .p1-footer { left: 0; right: 0; bottom: 3vw; gap: 14px; align-items: center; }
       .p1-social { gap: 22px; justify-content: center; }
@@ -197,9 +206,9 @@
     <div class="bg-stage">
       <img src="Assets/01/Fondo.png"  style="--x:0;   --y:0;   --w:1920" data-depth="40" class="bg-fondo" alt="" />
       <canvas class="bg-humo humo-atras" width="960" height="540" data-depth="32"></canvas>
-      <img src="Assets/02/ANGEL.png"   style="--x:21;  --y:198; --w:729" data-depth="30" alt="" />
-      <img src="Assets/02/Aureola.png" style="--x:427; --y:166; --w:189" data-depth="30" class="bg-aureola" alt="" />
-      <img src="Assets/02/Diablo.png"  style="--x:477; --y:206; --w:546" data-depth="24" alt="" />
+      <div class="bg-capa bg-espejo capa-angel"   style="--x:294; --y:198; --w:729" data-depth="30"><img src="Assets/02/ANGEL.png" alt="" /></div>
+      <div class="bg-capa bg-espejo capa-aureola" style="--x:428; --y:166; --w:189" data-depth="30"><img src="Assets/02/Aureola.png" class="bg-aureola" alt="" /></div>
+      <img src="Assets/02/Diablo.png"  style="--x:21; --y:206; --w:546" data-depth="24" class="capa-diablo" alt="" />
       <canvas class="bg-humo humo-adelante" width="960" height="540" data-depth="12"></canvas>
     </div>
   </div>
@@ -231,12 +240,10 @@
   </div>
 
   <script src="humo.js"></script>
-  <script src="transicion-fuego.js"></script>
   <script>
-    // ENVIAR (Boton_2) -> pantalla de gracias, pasando con el video de fuego
-    TransicionFuego.preparar();
+    // ENVIAR (Boton_2) -> pantalla de gracias
     document.querySelector('.p2-enviar-btn').addEventListener('click', () => {
-      TransicionFuego.salir('gracias.html');
+      window.location.href = 'gracias.html';
     });
 
     // Parallax horizontal del fondo (igual que en el index).

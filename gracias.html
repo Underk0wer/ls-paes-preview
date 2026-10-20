@@ -5,11 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow" />
   <title>¡Gracias! — Limón Soda</title>
-  <script>
-    // Si se llega desde el formulario con el video de fuego, la página parte cubierta
-    // (antes de pintarse) y transicion-fuego.js la destapa cuando el fondo terminó de cargar
-    try { if (sessionStorage.getItem('transicion-fuego') === '1') document.documentElement.classList.add('fuego-entrando'); } catch (e) {}
-  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -52,7 +47,7 @@
     /* Animaciones de entrada */
     @keyframes p1-in   { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes p1-fade { from { opacity: 0; } to { opacity: 1; } }
-    /* Pulso suave para Gracias / Sabático */
+    /* Pulso suave para el título */
     @keyframes g-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
     /* ===== Elementos de Pagina_3: columna a la izquierda =====
@@ -60,33 +55,25 @@
        (x 826 del lienzo). Como la lata se mueve con el encuadre del fondo, el ancho usa
        la misma escala que .bg-stage: en 16:9 mide 33vw; en pantallas más angostas se
        achica para no tocar la lata, y en las más anchas se limita por el alto (58.67vh
-       = 33vw a 16:9) para que los textos no se amontonen. Dentro de la columna, cada elemento
-       conserva su posición relativa del diseño original (en % del ancho de la columna).
-       Gracias: capa externa = posición + entrada, img interna = pulso.
-       Así el pulso (scale) no choca con la animación de entrada (translateY). */
+       = 33vw a 16:9) para que los textos no se amontonen. Los textos van centrados en
+       vertical en la pantalla (el bloque es más bajo que el espacio sobre el pie).
+       Los SVG de Assets/03 (01–04) vienen dibujados a la misma escala: el título mide el
+       ancho de la columna y cada paso conserva su ancho relativo (717 / 542 / 830 de 1012).
+       Los márgenes en % se calculan sobre el ancho de la columna.
+       Título: capa externa = entrada, img interna = pulso (no chocan los transform). */
     .g-textos   { position: fixed; z-index: 2; top: 0; bottom: 0; left: 8%;
-                  width: min(58.67vh, calc(40.33vw - max(100vw, 100vh * 16 / 9) * 0.07328)); }
-    .g-textos > * { position: absolute; }
-    .g-gracias  { top: 14%; left: 0;      width: 100%;
-                  animation: p1-in 0.8s ease-out 0.30s backwards; }
-    .g-comparte { top: 43%; left: 0;      width: 93.94%;
-                  animation: p1-in 0.7s ease-out 0.55s backwards; }
-    .g-slogan   { top: 73%; left: 19.7%;  width: 62.12%;
-                  animation: p1-in 0.7s ease-out 0.80s backwards; }
-
-    /* Pulso suave en Gracias */
-    .g-gracias  img { animation: g-pulse 2.6s ease-in-out 1.20s infinite; }
-
-    /* Botones para compartir (Facebook / WhatsApp) */
-    .g-share    { z-index: 3; top: 60%; width: 14.55%;
-                  animation: p1-in 0.7s ease-out 0.68s backwards; }
-    .g-share.fb { left: 29.09%; }
-    .g-share.ws { left: 50%; }
-    .g-share img { transition: transform 0.15s ease; }
-    .g-share:hover img { transform: scale(1.12); }
-
-    .g-gracias img, .g-share img { display: block; width: 100%; height: auto; }
-    .g-comparte, .g-slogan { display: block; }
+                  width: min(58.67vh, calc(40.33vw - max(100vw, 100vh * 16 / 9) * 0.07328));
+                  display: flex; flex-direction: column; align-items: flex-start;
+                  justify-content: center; justify-content: safe center; }
+    .g-textos img { display: block; height: auto; }
+    .g-titulo img { width: 100%; }
+    .g-titulo { width: 100%;
+                animation: p1-in 0.8s ease-out 0.30s backwards; }
+    .g-titulo img { animation: g-pulse 2.6s ease-in-out 1.20s infinite; }
+    .g-paso   { margin-top: 4%; animation: p1-in 0.7s ease-out backwards; }
+    .g-paso1  { width: 70.83%; margin-top: 6%; animation-delay: 0.45s; }
+    .g-paso2  { width: 53.58%; animation-delay: 0.55s; }
+    .g-paso3  { width: 81.98%; animation-delay: 0.65s; }
 
     /* ===== Compartidos con las otras pantallas ===== */
     .logo-ls {
@@ -108,48 +95,35 @@
     .p1-legal  { display: flex; gap: 18px; align-items: flex-end; }
     .p1-legal img { height: 1.5vw; width: auto; display: block; }
 
-    /* Llegada con el video de fuego: el cuadro del pico (sobre el mismo fondo rojo
-       oscuro de transicion-fuego.js) cubre la página hasta que el video toma el relevo,
-       y las animaciones de entrada esperan a que el fuego se disipe */
-    html.fuego-entrando body::after {
-      content: ""; position: fixed; inset: 0; z-index: 2147482000;
-      background: url("Assets/02/Fire_pico.webp") center / cover no-repeat,
-                  linear-gradient(to bottom, rgb(35,5,0), rgb(95,18,2) 50%, rgb(170,55,8));
-    }
-    html.fuego-entrando body * { animation-play-state: paused !important; }
-
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
       .bg-comp { --fx: 70%; }                       /* mobile: encuadre de la biblioteca */
       .logo-ls { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
 
-      /* Estudiante y lata: más chicos que en desktop, bajo los botones de compartir y
-         apoyados en el borde inferior. En el lienzo el grupo ocupa x 826–1868 (1042 px)
-         e y 129–1080 (951 px). --gh es su alto en pantalla (parte en y ≈ 38.9% + 45.9vw,
-         bajo los botones de compartir), y como máximo 94vw de ancho */
-      .bg-personaje {
+      /* Estudiante y lata: más chicos que en desktop, bajo los textos y apoyados en el borde
+         inferior. En el lienzo el grupo ocupa x 826–1868 (1042 px) e y 129–1080 (951 px).
+         --gh es su alto en pantalla: lo que queda bajo los textos puestos justo bajo el logo
+         (terminan en 2vh + 96.1vw, ver .g-textos), menos 12px de aire, y como máximo 94vw de
+         ancho. Se define en body porque .g-textos también lo usa para centrarse */
+      body {
         --vh: 1vh;
-        --gh: min(calc(var(--vh) * 61.1 - 45.9vw - 13px), calc(94vw * 951 / 1042));
+        --gh: min(calc(var(--vh) * 98 - 96.1vw - 12px), calc(94vw * 951 / 1042));
+      }
+      @supports (height: 1dvh) { body { --vh: 1dvh; } }   /* alto visible real en mobile */
+      .bg-personaje {
         --gw: calc(var(--gh) * 1042 / 951);
         top: auto; bottom: 0;
         left: calc(50% - var(--gw) / 2 - var(--gw) * 826 / 1042);
         width: calc(var(--gw) * 1920 / 1042);
         transform: none;
       }
-      @supports (height: 1dvh) { .bg-personaje { --vh: 1dvh; } }   /* alto visible real en mobile */
 
-      .g-textos { left: 0; width: 100%; }           /* mobile: columna a todo el ancho, textos centrados */
-      .g-gracias, .g-comparte {
-        left: 0; right: 0; margin-left: auto; margin-right: auto;   /* centra sin transform */
-      }
-      .g-gracias  { top: 16%; width: 84vw; }
-      .g-comparte { top: 33%; width: 86vw; }
-      .g-slogan   { display: none; }                /* mobile: sin "Haz todo / Haz nada" */
-
-      /* Botones de compartir centrados como par */
-      .g-share { top: 45%; width: 16vw; }
-      .g-share.fb { left: 29vw; right: auto; }
-      .g-share.ws { left: 55vw; right: auto; }
+      /* Textos: columna de 88vw, centrada en vertical en el espacio libre entre el logo
+         (termina en 2vh + 23.6vw; con aire, 2vh + 26vw) y el estudiante (parte en
+         100vh − --gh; con aire, 12px antes). Alto del bloque: título 21.75 + 5.28 + paso 1
+         11.55 + 3.52 + paso 2 7.32 + 3.52 + paso 3 17.2 = 70.12vw */
+      .g-textos { top: calc((var(--vh) * 2 + 26vw + var(--vh) * 100 - var(--gh) - 12px - 70.12vw) / 2);
+                  bottom: auto; left: 6vw; width: 88vw; justify-content: flex-start; }
 
       .p1-footer { left: 0; right: 0; bottom: 2.5%; gap: 14px; align-items: center; }
       .p1-social { gap: 22px; justify-content: center; }
@@ -175,11 +149,10 @@
 
   <!-- Elementos Pagina_3 -->
   <div class="g-textos">
-    <div class="g-gracias"><img src="Assets/Pagina_3/Gracias_1.svg" alt="¡Gracias! Ya estás participando" /></div>
-    <img class="g-comparte" src="Assets/Pagina_3/Comparte_1.svg" alt="Comparte el concurso con tus amigos" />
-    <img class="g-slogan" src="Assets/Pagina_2/Haztodo.svg" alt="Haz todo, haz nada" />
-    <a class="g-share fb" id="share-fb" target="_blank" rel="noopener noreferrer" aria-label="Compartir en Facebook"><img src="Assets/Pagina_3/FB_Share.svg" alt="Facebook" /></a>
-    <a class="g-share ws" id="share-ws" target="_blank" rel="noopener noreferrer" aria-label="Compartir por WhatsApp"><img src="Assets/Pagina_3/WS_Share.svg" alt="WhatsApp" /></a>
+    <div class="g-titulo"><img src="Assets/03/01.svg" alt="¿Quieres multiplicar tus lucas x2?" /></div>
+    <img class="g-paso g-paso1" src="Assets/03/02.svg" alt="1. Sube un video a Instagram reaccionando a tu puntaje PAES" />
+    <img class="g-paso g-paso2" src="Assets/03/03.svg" alt="2. Etiqueta a Limón Soda" />
+    <img class="g-paso g-paso3" src="Assets/03/04.svg" alt="3. Estarás participando por cambiar 1 punto = 2 luca$" />
   </div>
 
   <!-- Compartidos -->
@@ -197,15 +170,6 @@
   </div>
 
   <script>
-    // Botones de compartir: apuntan a la página de inicio del sitio
-    (function () {
-      var siteUrl = window.location.origin + window.location.pathname.replace(/gracias\.html$/, 'index.html');
-      var enc = encodeURIComponent(siteUrl);
-      var msg = encodeURIComponent('¡Participa por un Año Sabático con Limón Soda Zero! ' + siteUrl);
-      document.getElementById('share-fb').href = 'https://www.facebook.com/sharer/sharer.php?u=' + enc;
-      document.getElementById('share-ws').href = 'https://wa.me/?text=' + msg;
-    })();
-
     // Parallax horizontal del fondo (igual que en el index): el estudiante y la lata quedan fijos.
     // data-depth = desplazamiento máximo en px del lienzo 1920×1080 con el mouse en el borde.
     const bgStage = document.querySelector('.bg-stage');
@@ -225,7 +189,5 @@
       if (!bgRaf) bgRaf = requestAnimationFrame(stepBg);
     });
   </script>
-  <script src="transicion-fuego.js"></script>
-  <script>TransicionFuego.entrar();</script>
 </body>
 </html>
