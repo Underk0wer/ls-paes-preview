@@ -37,6 +37,15 @@
       pointer-events: none; user-select: none;
     }
 
+    /* Aureola del ángel: flota de arriba hacia abajo en loop (igual que en el index).
+       Usa la propiedad translate (no transform) para sumarse al parallax, que mueve la
+       capa con transform; ±5% de su alto ≈ ±7 px del lienzo */
+    .bg-aureola { animation: aureola-flota 3.2s ease-in-out infinite; }
+    @keyframes aureola-flota {
+      0%, 100% { translate: 0 -5%; }
+      50%      { translate: 0 5%; }
+    }
+
     /* Humo: canvas dentro del escenario (lo dibuja humo.js) */
     .bg-humo {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -130,20 +139,51 @@
 
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
-      .bg-comp { --fx: 30%; }                       /* mobile: encuadra al diablo */
-      .logo-ls  { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
+      /* Mobile: página con scroll en la que todo se mide en vw (escala con el ancho, como un
+         afiche): logo, título, recuadro y botones arriba; ángel y diablo abajo, sobre
+         Fondo_Mobile. Todo va en position: absolute (no fixed), así el fondo y los elementos
+         se desplazan juntos al hacer scroll. El alto (268.5vw) es el fin de los botones
+         (171.55vw) + 5vw de aire + el alto de los personajes (91.95vw) */
+      html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
+      html { background: #a1866e; }                /* color del techo de Fondo_Mobile, por si el scroll rebota */
+      body { position: relative; min-height: max(100vh, 268.5vw); background: transparent; }
+      .bg-comp { position: absolute;
+                 background: #a76c45 url("Assets/02/Fondo_Mobile.jpg") center bottom / cover no-repeat; }
+      .bg-stage .bg-fondo { display: none; }        /* la biblioteca horizontal es solo para desktop */
 
+      /* Ángel, aureola, diablo y humo: el grupo ocupa x 21–1023 (1002 px) e y 166–1080 (914 px)
+         del lienzo; en mobile mide 100.8vw de ancho (91.95vw de alto), centrado y apoyado abajo */
+      .bg-stage {
+        --gw: 100.8vw;
+        top: auto; bottom: 0;
+        left: calc(50% - var(--gw) / 2 - var(--gw) * 21 / 1002);
+        width: calc(var(--gw) * 1920 / 1002);
+        transform: none;
+      }
+      /* El escenario achicado deja sus bordes izquierdo y superior dentro de la pantalla:
+         el humo se desvanece hacia ellos para que no se vea cortado */
+      .bg-humo {
+        -webkit-mask-image: linear-gradient(to right, transparent, #000 12%), linear-gradient(to bottom, transparent, #000 28%);
+        -webkit-mask-composite: source-in;
+                mask-image: linear-gradient(to right, transparent, #000 12%), linear-gradient(to bottom, transparent, #000 28%);
+                mask-composite: intersect;
+      }
+
+      .logo-ls, .p2-titulo, .p2-panel, .p2-enviar, .p2-borrar, .p1-footer { position: absolute; }
+      .logo-ls  { top: 4.3vw; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
+
+      /* Título 3vw bajo el logo (que termina en 27.9vw); recuadro y botones a continuación */
       .p2-titulo { left: 0; right: 0; margin-left: auto; margin-right: auto;
-                   top: 18%; width: 88vw; }
+                   top: 30.9vw; width: 88vw; }
       .p2-panel  { left: 0; right: 0; margin-left: auto; margin-right: auto;
-                   top: 27%; width: 92vw; height: auto; aspect-ratio: 580 / 644; }
+                   top: 50.4vw; width: 92vw; height: auto; aspect-ratio: 580 / 644; }
       .p2-slogan { display: none; }                /* Haztodo: se oculta para no chocar con el recuadro */
 
       /* Botones ENVIAR / BORRAR centrados como par, debajo del recuadro */
-      .p2-enviar { left: 2vw;  right: auto; top: 77%; width: 47vw; }
-      .p2-borrar { left: 51vw; right: auto; top: 77%; width: 47vw; }
+      .p2-enviar { left: 2vw;  right: auto; top: 158.6vw; width: 47vw; }
+      .p2-borrar { left: 51vw; right: auto; top: 158.6vw; width: 47vw; }
 
-      .p1-footer { left: 0; right: 0; bottom: 2.5%; gap: 14px; align-items: center; }
+      .p1-footer { left: 0; right: 0; bottom: 3vw; gap: 14px; align-items: center; }
       .p1-social { gap: 22px; justify-content: center; }
       .p1-social img { width: 8vw; }
       .p1-legal  { gap: 4vw; justify-content: center; }
@@ -155,9 +195,11 @@
   <!-- Fondo: capas de atrás hacia adelante (biblioteca, humo, diablo, humo hasta el pecho) -->
   <div class="bg-comp" aria-hidden="true">
     <div class="bg-stage">
-      <img src="Assets/01/Fondo.png"  style="--x:0;   --y:0;   --w:1920" data-depth="40" alt="" />
+      <img src="Assets/01/Fondo.png"  style="--x:0;   --y:0;   --w:1920" data-depth="40" class="bg-fondo" alt="" />
       <canvas class="bg-humo humo-atras" width="960" height="540" data-depth="32"></canvas>
-      <img src="Assets/02/Diablo.png" style="--x:226; --y:161; --w:685"  data-depth="24" alt="" />
+      <img src="Assets/02/ANGEL.png"   style="--x:21;  --y:198; --w:729" data-depth="30" alt="" />
+      <img src="Assets/02/Aureola.png" style="--x:427; --y:166; --w:189" data-depth="30" class="bg-aureola" alt="" />
+      <img src="Assets/02/Diablo.png"  style="--x:477; --y:206; --w:546" data-depth="24" alt="" />
       <canvas class="bg-humo humo-adelante" width="960" height="540" data-depth="12"></canvas>
     </div>
   </div>
@@ -216,22 +258,23 @@
       if (!bgRaf) bgRaf = requestAnimationFrame(stepBg);
     });
 
-    // Humo detrás del diablo: nace a los costados de su silueta (el diablo ocupa x 226–911)
-    // y sube rodeando hombros y cabeza
+    // Humo detrás del ángel y el diablo: nace a los costados del grupo (el ángel ocupa
+    // x ≈ 50–680 y el diablo x ≈ 480–1020), y entre sus cabezas, y sube rodeándolos
     crearHumo(document.querySelector('.humo-atras'), {
       cantidad: 40,
-      zonas: [[-100, 330, 0.4], [700, 1250, 0.45], [1250, 2000, 0.15]],
-      y: [200, 850], subida: [10, 25], deriva: 14,
+      zonas: [[-100, 200, 0.3], [560, 700, 0.15], [950, 1450, 0.4], [1450, 2000, 0.15]],
+      y: [240, 890], subida: [10, 25], deriva: 14,
       tamano: [260, 420], crece: [10, 25], vida: [20, 30], opacidad: [0.35, 0.5],
     });
 
-    // Humo delante del diablo: niebla baja que le llega hasta el pecho (y ≈ 600–720)
+    // Humo delante del ángel y el diablo: niebla baja que les llega hasta el pecho
+    // (colgante del ángel y nudo de la corbata del diablo: y ≈ 540–640)
     crearHumo(document.querySelector('.humo-adelante'), {
       cantidad: 34,
-      zonas: [[100, 1050, 0.85], [1050, 1600, 0.15]],
-      y: [700, 1150], subida: [3, 10], deriva: 20,
+      zonas: [[60, 1060, 0.85], [1060, 1600, 0.15]],
+      y: [700, 1190], subida: [3, 10], deriva: 20,
       tamano: [320, 500], crece: [8, 18], vida: [18, 28], opacidad: [0.3, 0.45],
-      techo: [590, 730],
+      techo: [550, 690],
     });
   </script>
 </body>

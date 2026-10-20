@@ -5,6 +5,11 @@ Assets/01/Fondo_Base.jpg
 Assets/01/Texto/Fondo_Texto.png
 Assets/02/Fondo_Formulario.jpg
 Assets/03/Fondo_TY.jpg
+Assets/01/Mobile/Fondo_Mobile.jpg
+
+# Archivos fuente de Photoshop: pesan cientos de MB (GitHub rechaza archivos de más de 100 MB)
+*.psb
+*.psd
 
 # Video original de la transición (ProRes, 52 MB): la web usa Fire.webm y Fire_hevc.mov
 Assets/02/Fire.mov

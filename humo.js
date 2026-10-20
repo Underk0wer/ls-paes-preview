@@ -1,9 +1,11 @@
 /* Humo procedural para los fondos por capas (.bg-stage).
-   Cada <canvas class="bg-humo"> cubre el lienzo de 1920×1080 y se dibuja a media
-   resolución (el humo es difuso). Todas las coordenadas y tamaños de las opciones
-   van en px de ese lienzo.
+   Cada <canvas class="bg-humo"> cubre el lienzo de su escenario (1920×1080 en desktop,
+   1080×1920 en el index mobile) y se dibuja a media resolución (el humo es difuso).
+   Todas las coordenadas y tamaños de las opciones van en px de ese lienzo. Mientras el
+   canvas está oculto (su escenario con display: none) no se dibuja.
 
    crearHumo(canvas, {
+     ancho: 1920,                       // ancho del lienzo del escenario
      cantidad: 46,                      // bocanadas simultáneas
      zonas: [[xMin, xMax, peso], ...],  // dónde nacen (en horizontal) y con qué probabilidad
      y: [min, max],                     // altura donde nacen
@@ -63,7 +65,7 @@
 
   window.crearHumo = function (canvas, o) {
     const ctx = canvas.getContext('2d');
-    const SCALE = canvas.width / 1920;
+    const SCALE = canvas.width / (o.ancho || 1920);
     const textures = getPuffs();
     const pesoTotal = o.zonas.reduce((s, z) => s + z[2], 0);
 
@@ -105,6 +107,7 @@
     const frame = (now) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
+      if (!canvas.getClientRects().length) { requestAnimationFrame(frame); return; }
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalCompositeOperation = 'source-over';
       ctx.clearRect(0, 0, canvas.width, canvas.height);

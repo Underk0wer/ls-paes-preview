@@ -120,16 +120,31 @@
 
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
-      .bg-comp { --fx: 70%; }                       /* mobile: encuadra la lata y al estudiante */
+      .bg-comp { --fx: 70%; }                       /* mobile: encuadre de la biblioteca */
       .logo-ls { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
 
+      /* Estudiante y lata: más chicos que en desktop, bajo los botones de compartir y
+         apoyados en el borde inferior. En el lienzo el grupo ocupa x 826–1868 (1042 px)
+         e y 129–1080 (951 px). --gh es su alto en pantalla (parte en y ≈ 38.9% + 45.9vw,
+         bajo los botones de compartir), y como máximo 94vw de ancho */
+      .bg-personaje {
+        --vh: 1vh;
+        --gh: min(calc(var(--vh) * 61.1 - 45.9vw - 13px), calc(94vw * 951 / 1042));
+        --gw: calc(var(--gh) * 1042 / 951);
+        top: auto; bottom: 0;
+        left: calc(50% - var(--gw) / 2 - var(--gw) * 826 / 1042);
+        width: calc(var(--gw) * 1920 / 1042);
+        transform: none;
+      }
+      @supports (height: 1dvh) { .bg-personaje { --vh: 1dvh; } }   /* alto visible real en mobile */
+
       .g-textos { left: 0; width: 100%; }           /* mobile: columna a todo el ancho, textos centrados */
-      .g-gracias, .g-comparte, .g-slogan {
+      .g-gracias, .g-comparte {
         left: 0; right: 0; margin-left: auto; margin-right: auto;   /* centra sin transform */
       }
       .g-gracias  { top: 16%; width: 84vw; }
       .g-comparte { top: 33%; width: 86vw; }
-      .g-slogan   { top: 53%; width: 52vw; }
+      .g-slogan   { display: none; }                /* mobile: sin "Haz todo / Haz nada" */
 
       /* Botones de compartir centrados como par */
       .g-share { top: 45%; width: 16vw; }
@@ -145,10 +160,14 @@
   </style>
 </head>
 <body>
-  <!-- Fondo estancia 3: capas de atrás hacia adelante (biblioteca, estudiante, lata) -->
+  <!-- Fondo estancia 3: capas de atrás hacia adelante (biblioteca, estudiante, lata).
+       El estudiante y la lata van en un escenario propio (.bg-personaje) para poder
+       achicarlos y moverlos en mobile; en desktop mide y se ubica igual que el del fondo -->
   <div class="bg-comp" aria-hidden="true">
     <div class="bg-stage">
       <img src="Assets/03/Fondo.png"      style="--x:0;   --y:0;   --w:1920" data-depth="40" alt="" />
+    </div>
+    <div class="bg-stage bg-personaje">
       <img src="Assets/03/ESTUDIANTE.png" style="--x:968; --y:129; --w:900"  alt="" />
       <img src="Assets/03/Mano_Lata.png"  style="--x:826; --y:160; --w:489"  class="bg-lata" alt="" />
     </div>

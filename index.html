@@ -46,6 +46,18 @@
       user-select: none;
     }
 
+    /* Escenario mobile: capas de Assets/01/Mobile sobre un lienzo de 1080×1920
+       (referencia: 01/Mobile/Fondo_Mobile). Solo se muestra en mobile */
+    .bg-stage-m { display: none; }
+    .bg-stage-m img {
+      position: absolute;
+      left:  calc(var(--x) / 1080 * 100%);
+      top:   calc(var(--y) / 1920 * 100%);
+      width: calc(var(--w) / 1080 * 100%);
+      height: auto; display: block;
+      pointer-events: none; user-select: none;
+    }
+
     /* Humo: canvas dentro del escenario (lo dibuja humo.js) */
     .bg-humo {
       position: absolute;
@@ -54,6 +66,15 @@
       height: 100%;
       pointer-events: none;
       animation: p1-fade 1.5s ease-out backwards;
+    }
+
+    /* Aureola del ángel: flota de arriba hacia abajo en loop, centrada en su posición de
+       Fondo_Base. Usa la propiedad translate (no transform) para sumarse al parallax, que
+       mueve la capa con transform; ±5% de su alto ≈ ±6 px del lienzo */
+    .bg-aureola { animation: aureola-flota 3.2s ease-in-out infinite; }
+    @keyframes aureola-flota {
+      0%, 100% { translate: 0 -5%; }
+      50%      { translate: 0 5%; }
     }
 
     /* Lata: pulso suave. Solo crece (nunca baja de scale 1) para no destapar lo que hay detrás */
@@ -220,18 +241,36 @@
 
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
-      .bg-comp  { --fx: 42%; }                      /* mobile: encuadra la lata y al estudiante */
-      .logo-ls  { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
+      /* El escenario mobile (1080×1920) cubre la pantalla como object-fit: cover, centrado.
+         --sw y --sh son su ancho y alto en pantalla; el logo, los textos, el botón y el pie
+         se ubican con px de ese lienzo (X → 50% + (X/1080 − 0.5)·--sw; Y igual con 1920 y
+         --sh) para que siempre calcen con los personajes */
+      body { --vh: 1vh;
+             --sw: max(100vw, var(--vh) * 100 * 9 / 16);
+             --sh: max(var(--vh) * 100, 100vw * 16 / 9); }
+      @supports (height: 1dvh) { body { --vh: 1dvh; } }   /* alto visible real en mobile */
+      .bg-stage { display: none; }                   /* la composición horizontal es solo para desktop */
+      .bg-stage-m { display: block; position: absolute; left: 50%; top: 50%;
+                    width: var(--sw); height: var(--sh); transform: translate(-50%, -50%); }
 
-      /* Bloque de textos centrado, agrupado sobre el botón */
-      .p1-textos { left: 0; right: 0; bottom: auto; margin-left: auto; margin-right: auto;
-                   top: 24%; width: 92vw; }
+      /* Logo: arriba a la derecha, junto a "CAMBIA TUS" (que termina en x 516) y sobre "PUNTOS PAES"
+         (que parte en y 241); su borde derecho calza con el del bloque de textos (lienzo x 601–951, y 22–219) */
+      .logo-ls  { left: calc(50% + (601 / 1080 - 0.5) * var(--sw)); right: auto; margin: 0;
+                  top: calc(50% + (22 / 1920 - 0.5) * var(--sh)); width: calc(350 / 1080 * var(--sw)); }
 
-      /* Botón participa: 20% más pequeño */
-      .btn-wrap { top: 52%; bottom: auto; width: 67vw; }
+      /* Bloque de textos: el mismo de desktop a escala 1.11 (lienzo x 121, y 162, 830 px de ancho) */
+      .p1-textos { left: calc(50% + (121 / 1080 - 0.5) * var(--sw)); right: auto; bottom: auto; margin: 0;
+                   top: calc(50% + (162 / 1920 - 0.5) * var(--sh)); width: calc(830.28 / 1080 * var(--sw)); }
 
-      /* Footer centrado */
-      .p1-footer { left: 0; right: 0; bottom: 2.5%; gap: 14px; align-items: center; }
+      /* Botón participa: centro en x 560, arriba en y 1605, 527 px de ancho. En mobile se ve
+         amarillo (Boton_1_M) como en Fondo_Mobile; al presionar sigue mostrando Boton_1_P */
+      .btn-wrap { left: calc(50% + (560 / 1080 - 0.5) * var(--sw)); bottom: auto;
+                  top: calc(50% + (1605 / 1920 - 0.5) * var(--sh)); width: calc(526.9 / 1080 * var(--sw)); }
+      .btn-participa::before { background-image: url("Assets/Boton_1_M.svg"); }
+
+      /* Footer centrado bajo el botón, terminando en y 1905 del lienzo */
+      .p1-footer { left: 0; right: 0; bottom: calc(50% - (1905 / 1920 - 0.5) * var(--sh));
+                   gap: 8px; align-items: center; }
       .p1-social { gap: 22px; justify-content: center; }
       .p1-social img { width: 8vw; }
       .p1-legal  { gap: 4vw; justify-content: center; }
@@ -240,16 +279,29 @@
   </style>
 </head>
 <body>
-  <!-- Fondo estancia 1: capas de atrás hacia adelante (fondo, diablo, ángel, humo hasta el pecho, estudiante, mesa, lata) -->
+  <!-- Fondo estancia 1: capas de atrás hacia adelante (fondo, diablo, ángel, humo hasta el pecho, estudiante, mesa, lata).
+       Un escenario para desktop y otro para mobile; con loading="lazy" cada dispositivo
+       descarga solo las imágenes del escenario que muestra -->
   <div class="bg-comp" aria-hidden="true">
     <div class="bg-stage">
-      <img src="Assets/01/Fondo.png"      style="--x:0;   --y:0;   --w:1920" data-depth="40"  alt="" />
-      <img src="Assets/01/Diablo.png"     style="--x:130; --y:83;  --w:505"  data-depth="24"  alt="" />
-      <img src="Assets/01/ANGEL.png"      style="--x:870; --y:15;  --w:974"  data-depth="24"  alt="" />
+      <img src="Assets/01/Fondo.png"      style="--x:0;   --y:0;   --w:1920" data-depth="40"  loading="lazy" alt="" />
+      <img src="Assets/01/Diablo.png"     style="--x:277; --y:217; --w:412"  data-depth="24"  loading="lazy" alt="" />
+      <img src="Assets/01/ANGEL.png"      style="--x:878; --y:184; --w:798"  data-depth="24"  loading="lazy" alt="" />
+      <img src="Assets/01/Aureola.png"    style="--x:1400; --y:161; --w:154" data-depth="24"  loading="lazy" class="bg-aureola" alt="" />
       <canvas class="bg-humo humo-pecho" width="960" height="540" data-depth="12"></canvas>
-      <img src="Assets/01/ESTUDIANTE.png" style="--x:621; --y:101; --w:1297" alt="" />
-      <img src="Assets/01/MESA.png"       style="--x:0;   --y:0;   --w:1920" data-depth="-12" alt="" />
-      <img src="Assets/01/Mano_Lata.png"  style="--x:460; --y:210; --w:489"  class="bg-lata" alt="" />
+      <img src="Assets/01/ESTUDIANTE.png" style="--x:678; --y:232; --w:1058" loading="lazy" alt="" />
+      <img src="Assets/01/MESA.png"       style="--x:0;   --y:0;   --w:1920" data-depth="-12" loading="lazy" alt="" />
+      <img src="Assets/01/Mano_Lata.png"  style="--x:547; --y:320; --w:399"  loading="lazy" class="bg-lata" alt="" />
+    </div>
+    <div class="bg-stage-m">
+      <img src="Assets/01/Mobile/FONDO.png"      style="--x:0;   --y:0;   --w:1080" loading="lazy" alt="" />
+      <img src="Assets/01/Mobile/Diablo.png"     style="--x:13;  --y:642; --w:434"  loading="lazy" alt="" />
+      <img src="Assets/01/Mobile/ANGEL.png"      style="--x:261; --y:622; --w:819"  loading="lazy" alt="" />
+      <img src="Assets/01/Mobile/Aureola.png"    style="--x:804; --y:599; --w:161"  loading="lazy" class="bg-aureola" alt="" />
+      <canvas class="bg-humo humo-pecho-m" width="540" height="960"></canvas>
+      <img src="Assets/01/Mobile/ESTUDIANTE.png" style="--x:254; --y:888; --w:569"  loading="lazy" alt="" />
+      <img src="Assets/01/Mobile/MESA.png"       style="--x:0;   --y:88;  --w:1080" loading="lazy" alt="" />
+      <img src="Assets/01/Mobile/Mano_Lata.png"  style="--x:118; --y:979; --w:414"  loading="lazy" class="bg-lata" alt="" />
     </div>
   </div>
 
@@ -340,13 +392,25 @@
     });
 
     // Humo entre el estudiante y el diablo/ángel: niebla baja que sale de detrás de la
-    // mesa y les llega hasta el pecho (pecho del diablo y del ángel: y ≈ 420–480)
+    // mesa y les llega hasta el pecho (pecho del diablo y del ángel: y ≈ 490–560;
+    // el diablo ocupa x ≈ 280–690 y el ángel x ≈ 1140–1650)
     crearHumo(document.querySelector('.humo-pecho'), {
       cantidad: 40,
-      zonas: [[-60, 700, 0.45], [1150, 1980, 0.45], [700, 1150, 0.1]],
-      y: [480, 820], subida: [3, 10], deriva: 20,
+      zonas: [[160, 760, 0.45], [1080, 1780, 0.45], [760, 1080, 0.1]],
+      y: [560, 880], subida: [3, 10], deriva: 20,
       tamano: [300, 480], crece: [8, 18], vida: [18, 28], opacidad: [0.35, 0.5],
-      techo: [410, 540],
+      techo: [490, 620],
+    });
+
+    // Lo mismo en el escenario mobile (lienzo 1080×1920): pecho del diablo y del ángel
+    // en y ≈ 920–1000; el diablo ocupa x ≈ 13–447 y el ángel x ≈ 470–1080
+    crearHumo(document.querySelector('.humo-pecho-m'), {
+      ancho: 1080,
+      cantidad: 26,
+      zonas: [[-40, 470, 0.45], [560, 1120, 0.45], [470, 560, 0.1]],
+      y: [1000, 1450], subida: [3, 10], deriva: 20,
+      tamano: [300, 480], crece: [8, 18], vida: [18, 28], opacidad: [0.35, 0.5],
+      techo: [900, 1020],
     });
 
     /* ===== PRUEBA: transición círculo amarillo -> formulario =====
