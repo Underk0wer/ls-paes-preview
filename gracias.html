@@ -56,24 +56,29 @@
        la misma escala que .bg-stage: en 16:9 mide 33vw; en pantallas más angostas se
        achica para no tocar la lata, y en las más anchas se limita por el alto (58.67vh
        = 33vw a 16:9) para que los textos no se amontonen. Los textos van centrados en
-       vertical en la pantalla (el bloque es más bajo que el espacio sobre el pie).
-       Los SVG de Assets/03 (01–04) vienen dibujados a la misma escala: el título mide el
-       ancho de la columna y cada paso conserva su ancho relativo (717 / 542 / 830 de 1012).
-       Los márgenes en % se calculan sobre el ancho de la columna.
-       Título: capa externa = entrada, img interna = pulso (no chocan los transform). */
+       vertical en la pantalla.
+       "¡Gracias!" mide el 90% de la columna. Los SVG de Assets/03 (01–04) vienen dibujados a
+       la misma escala: el título mide el ancho de la columna y cada paso conserva su ancho
+       relativo (717 / 542 / 830 de 1012).
+       Los márgenes en % se calculan sobre el ancho de la columna. El bloque mide 1.2326 veces
+       ese ancho; el tercer límite del ancho (calculado para 1.2721, con Gracias al 100%) lo
+       hace caber con al menos 12px de aire sobre el pie (que ocupa 3.5vh + 3.5vw + 34px abajo).
+       Gracias y título: capa externa = entrada, img interna = pulso (no chocan los transform). */
     .g-textos   { position: fixed; z-index: 2; top: 0; bottom: 0; left: 8%;
-                  width: min(58.67vh, calc(40.33vw - max(100vw, 100vh * 16 / 9) * 0.07328));
+                  width: min(58.67vh, calc(40.33vw - max(100vw, 100vh * 16 / 9) * 0.07328),
+                             calc((100vh - 7vh - 7vw - 92px) / 1.2721));
                   display: flex; flex-direction: column; align-items: flex-start;
                   justify-content: center; justify-content: safe center; }
     .g-textos img { display: block; height: auto; }
-    .g-titulo img { width: 100%; }
-    .g-titulo { width: 100%;
-                animation: p1-in 0.8s ease-out 0.30s backwards; }
-    .g-titulo img { animation: g-pulse 2.6s ease-in-out 1.20s infinite; }
+    .g-gracias img, .g-titulo img { width: 100%; animation: g-pulse 2.6s ease-in-out 1.20s infinite; }
+    .g-gracias { width: 90%;
+                 animation: p1-in 0.8s ease-out 0.30s backwards; }
+    .g-titulo  { width: 100%; margin-top: 8%;
+                 animation: p1-in 0.8s ease-out 0.45s backwards; }
     .g-paso   { margin-top: 4%; animation: p1-in 0.7s ease-out backwards; }
-    .g-paso1  { width: 70.83%; margin-top: 6%; animation-delay: 0.45s; }
-    .g-paso2  { width: 53.58%; animation-delay: 0.55s; }
-    .g-paso3  { width: 81.98%; animation-delay: 0.65s; }
+    .g-paso1  { width: 70.83%; margin-top: 6%; animation-delay: 0.55s; }
+    .g-paso2  { width: 53.58%; animation-delay: 0.65s; }
+    .g-paso3  { width: 81.98%; animation-delay: 0.75s; }
 
     /* ===== Compartidos con las otras pantallas ===== */
     .logo-ls {
@@ -97,19 +102,29 @@
 
     /* ===================== MOBILE (portrait) ===================== */
     @media (max-width: 768px) {
-      .bg-comp { --fx: 70%; }                       /* mobile: encuadre de la biblioteca */
-      .logo-ls { top: 2%; left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
-
-      /* Estudiante y lata: más chicos que en desktop, bajo los textos y apoyados en el borde
-         inferior. En el lienzo el grupo ocupa x 826–1868 (1042 px) e y 129–1080 (951 px).
-         --gh es su alto en pantalla: lo que queda bajo los textos puestos justo bajo el logo
-         (terminan en 2vh + 96.1vw, ver .g-textos), menos 12px de aire, y como máximo 94vw de
-         ancho. Se define en body porque .g-textos también lo usa para centrarse */
+      /* Página: mide --H, el alto de la pantalla o, si no alcanza (celulares bajos como el
+         iPhone SE), lo necesario para el logo, los textos (--tb) y un estudiante de al menos
+         70vw de alto; en ese caso aparece scroll. Por eso los elementos van en position:
+         absolute dentro de body (no fixed) y se desplazan juntos.
+         --gh es el alto del estudiante y la lata: lo que queda bajo los textos puestos justo
+         bajo el logo, menos 12px de aire, y como máximo 94vw de ancho. En el lienzo el grupo
+         ocupa x 826–1868 (1042 px) e y 129–1080 (951 px).
+         Alto de los textos: Gracias 28.45 + 5 + título 21.75 + 5.28 + paso 1 11.55 + 3.52
+         + paso 2 7.32 + 3.52 + paso 3 17.2 = 106.74vw */
+      html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
+      html { background: #b37755; }                /* color del borde inferior de la biblioteca, por si el scroll rebota */
       body {
         --vh: 1vh;
-        --gh: min(calc(var(--vh) * 98 - 96.1vw - 12px), calc(94vw * 951 / 1042));
+        --tb: 103.57vw;
+        --H: max(calc(var(--vh) * 100), calc(var(--vh) * 2 + 26vw + var(--tb) + 12px + 70vw));
+        --gh: min(calc(var(--H) - var(--vh) * 2 - 26vw - var(--tb) - 12px), calc(94vw * 951 / 1042));
+        position: relative; min-height: var(--H);
       }
       @supports (height: 1dvh) { body { --vh: 1dvh; } }   /* alto visible real en mobile */
+      .bg-comp, .logo-ls, .g-textos, .p1-footer { position: absolute; }
+      .bg-comp { --fx: 70%; }                       /* mobile: encuadre de la biblioteca */
+      .bg-stage:not(.bg-personaje) { width: calc(max(100vw, var(--H) * 16 / 9) * 1.05); }   /* cubre --H */
+      .logo-ls { top: calc(var(--vh) * 2); left: 0; right: 0; margin-left: auto; margin-right: auto; width: 42%; }
       .bg-personaje {
         --gw: calc(var(--gh) * 1042 / 951);
         top: auto; bottom: 0;
@@ -120,12 +135,14 @@
 
       /* Textos: columna de 88vw, centrada en vertical en el espacio libre entre el logo
          (termina en 2vh + 23.6vw; con aire, 2vh + 26vw) y el estudiante (parte en
-         100vh − --gh; con aire, 12px antes). Alto del bloque: título 21.75 + 5.28 + paso 1
-         11.55 + 3.52 + paso 2 7.32 + 3.52 + paso 3 17.2 = 70.12vw */
-      .g-textos { top: calc((var(--vh) * 2 + 26vw + var(--vh) * 100 - var(--gh) - 12px - 70.12vw) / 2);
+         --H − --gh; con aire, 12px antes). Gracias mide 72vw (81.82% de la columna) y va
+         centrado; el resto del bloque, alineado a la izquierda */
+      .g-textos { top: calc((var(--vh) * 2 + 26vw + var(--H) - var(--gh) - 12px - var(--tb)) / 2);
                   bottom: auto; left: 6vw; width: 88vw; justify-content: flex-start; }
+      .g-gracias { width: 81.82%; align-self: center; }
+      .g-titulo  { margin-top: 5.68%; }
 
-      .p1-footer { left: 0; right: 0; bottom: 2.5%; gap: 14px; align-items: center; }
+      .p1-footer { left: 0; right: 0; bottom: calc(var(--vh) * 2.5); gap: 14px; align-items: center; }
       .p1-social { gap: 22px; justify-content: center; }
       .p1-social img { width: 8vw; }
       .p1-legal  { gap: 4vw; justify-content: center; }
@@ -149,6 +166,7 @@
 
   <!-- Elementos Pagina_3 -->
   <div class="g-textos">
+    <div class="g-gracias"><img src="Assets/Pagina_3/Gracias_1.svg" alt="¡Gracias! Ya estás participando" /></div>
     <div class="g-titulo"><img src="Assets/03/01.svg" alt="¿Quieres multiplicar tus lucas x2?" /></div>
     <img class="g-paso g-paso1" src="Assets/03/02.svg" alt="1. Sube un video a Instagram reaccionando a tu puntaje PAES" />
     <img class="g-paso g-paso2" src="Assets/03/03.svg" alt="2. Etiqueta a Limón Soda" />
