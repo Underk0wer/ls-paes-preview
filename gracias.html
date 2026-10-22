@@ -59,14 +59,14 @@
        vertical en la pantalla.
        "¡Gracias!" mide el 90% de la columna. Los SVG de Assets/03 (01–04) vienen dibujados a
        la misma escala: el título mide el ancho de la columna y cada paso conserva su ancho
-       relativo (717 / 542 / 830 de 1012).
-       Los márgenes en % se calculan sobre el ancho de la columna. El bloque mide 1.2326 veces
-       ese ancho; el tercer límite del ancho (calculado para 1.2721, con Gracias al 100%) lo
+       relativo (717 / 616 / 830 de 1012).
+       Los márgenes en % se calculan sobre el ancho de la columna. El bloque mide 1.2284 veces
+       ese ancho; el tercer límite del ancho (calculado para 1.2679, con Gracias al 100%) lo
        hace caber con al menos 12px de aire sobre el pie (que ocupa 3.5vh + 3.5vw + 34px abajo).
        Gracias y título: capa externa = entrada, img interna = pulso (no chocan los transform). */
     .g-textos   { position: fixed; z-index: 2; top: 0; bottom: 0; left: 8%;
                   width: min(58.67vh, calc(40.33vw - max(100vw, 100vh * 16 / 9) * 0.07328),
-                             calc((100vh - 7vh - 7vw - 92px) / 1.2721));
+                             calc((100vh - 7vh - 7vw - 92px) / 1.2679));
                   display: flex; flex-direction: column; align-items: flex-start;
                   justify-content: center; justify-content: safe center; }
     .g-textos img { display: block; height: auto; }
@@ -77,7 +77,7 @@
                  animation: p1-in 0.8s ease-out 0.45s backwards; }
     .g-paso   { margin-top: 4%; animation: p1-in 0.7s ease-out backwards; }
     .g-paso1  { width: 70.83%; margin-top: 6%; animation-delay: 0.55s; }
-    .g-paso2  { width: 53.58%; animation-delay: 0.65s; }
+    .g-paso2  { width: 60.87%; animation-delay: 0.65s; }
     .g-paso3  { width: 81.98%; animation-delay: 0.75s; }
 
     /* ===== Compartidos con las otras pantallas ===== */
@@ -110,12 +110,12 @@
          bajo el logo, menos 12px de aire, y como máximo 94vw de ancho. En el lienzo el grupo
          ocupa x 826–1868 (1042 px) e y 129–1080 (951 px).
          Alto de los textos: Gracias 28.45 + 5 + título 21.75 + 5.28 + paso 1 11.55 + 3.52
-         + paso 2 7.32 + 3.52 + paso 3 17.2 = 106.74vw */
+         + paso 2 6.94 + 3.52 + paso 3 17.2 = 103.21vw */
       html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
       html { background: #b37755; }                /* color del borde inferior de la biblioteca, por si el scroll rebota */
       body {
         --vh: 1vh;
-        --tb: 103.57vw;
+        --tb: 103.21vw;
         --H: max(calc(var(--vh) * 100), calc(var(--vh) * 2 + 26vw + var(--tb) + 12px + 70vw));
         --gh: min(calc(var(--H) - var(--vh) * 2 - 26vw - var(--tb) - 12px), calc(94vw * 951 / 1042));
         position: relative; min-height: var(--H);
@@ -169,7 +169,7 @@
     <div class="g-gracias"><img src="Assets/Pagina_3/Gracias_1.svg" alt="¡Gracias! Ya estás participando" /></div>
     <div class="g-titulo"><img src="Assets/03/01.svg" alt="¿Quieres multiplicar tus lucas x2?" /></div>
     <img class="g-paso g-paso1" src="Assets/03/02.svg" alt="1. Sube un video a Instagram reaccionando a tu puntaje PAES" />
-    <img class="g-paso g-paso2" src="Assets/03/03.svg" alt="2. Etiqueta a Limón Soda" />
+    <img class="g-paso g-paso2" src="Assets/03/03.svg" alt="2. Etiqueta a @limonsodacl" />
     <img class="g-paso g-paso3" src="Assets/03/04.svg" alt="3. Estarás participando por cambiar 1 punto = 2 luca$" />
   </div>
 
