@@ -58,6 +58,15 @@
       50%      { translate: 0 5%; }
     }
 
+    /* Lata en la mano derecha del diablo (02/Mano_Lata: la de 03 con la mano pasada a guante negro).
+       Pulso suave como en el index; solo crece (nunca baja de scale 1) para no destapar el guante
+       del diablo que queda detrás, y crece desde la muñeca para no despegarse de la manga */
+    .bg-lata { animation: lata-pulse 2.6s ease-in-out infinite; transform-origin: 20% 85%; }
+    @keyframes lata-pulse {
+      0%, 100% { transform: scale(1);    }
+      50%      { transform: scale(1.04); }
+    }
+
     /* Humo: canvas dentro del escenario (lo dibuja humo.js) */
     .bg-humo {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -179,6 +188,7 @@
       .capa-diablo  { --mx: 93;  --my: 51; --mw: 297.6; }
       .capa-angel   { --mx: 568; --my: 36; --mw: 461.1; }
       .capa-aureola { --mx: 830; --my: 20; --mw: 110.4; }
+      .capa-lata    { --mx: 122; --my: 168; --mw: 124; }
 
       .logo-ls, .p2-titulo, .p2-panel, .p2-enviar, .p2-borrar, .p1-footer { position: absolute; }
       .logo-ls  { top: 3vw; left: 29.7vw; right: auto; margin: 0; width: 37.5vw; }   /* entre los dos personajes */
@@ -201,7 +211,8 @@
   </style>
 </head>
 <body>
-  <!-- Fondo: capas de atrás hacia adelante (biblioteca, humo, diablo, humo hasta el pecho) -->
+  <!-- Fondo: capas de atrás hacia adelante (biblioteca, humo, diablo, humo hasta el pecho, lata).
+       La lata lleva la misma profundidad que el diablo para no salirse de su mano con el parallax -->
   <div class="bg-comp" aria-hidden="true">
     <div class="bg-stage">
       <img src="Assets/01/Fondo.png"  style="--x:0;   --y:0;   --w:1920" data-depth="40" class="bg-fondo" alt="" />
@@ -210,6 +221,7 @@
       <div class="bg-capa bg-espejo capa-aureola" style="--x:428; --y:166; --w:189" data-depth="30"><img src="Assets/02/Aureola.png" class="bg-aureola" alt="" /></div>
       <img src="Assets/02/Diablo.png"  style="--x:21; --y:206; --w:546" data-depth="24" class="capa-diablo" alt="" />
       <canvas class="bg-humo humo-adelante" width="960" height="540" data-depth="12"></canvas>
+      <div class="bg-capa capa-lata" style="--x:118; --y:570; --w:230" data-depth="24"><img src="Assets/02/Mano_Lata.png" class="bg-lata" alt="" /></div>
     </div>
   </div>
 
